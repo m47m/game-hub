@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import apiClient from "../services/api-client";
+import { AxiosRequestConfig } from "axios";
 
 interface FetchResponse<T>{
 	count:number;
 	results:T[];
 }
 
-const useGames = <T>(endpoing:string) => {
+const useGames = <T>(endpoing:string,requesConfig?:AxiosRequestConfig,deps?:any[]) => {
 	const [data, setData] = useState<T[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +17,7 @@ const useGames = <T>(endpoing:string) => {
     setIsLoading(true);
 
     apiClient
-      .get<FetchResponse<T>>(endpoing,{signal:controller.signal})
+      .get<FetchResponse<T>>(endpoing,{signal:controller.signal,...requesConfig})
       .then((res) => {
         setData(res.data.results);
         setIsLoading(false);
@@ -28,7 +29,7 @@ const useGames = <T>(endpoing:string) => {
       });
 
 			return ()=>controller.abort();
-  },[]);
+  },deps ? [...deps]:[]);
 
 	return {data,error,isLoading}
 }
